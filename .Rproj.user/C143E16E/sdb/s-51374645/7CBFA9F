@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "\nsurvey2016 <- read.sas7bdat(\"survey2016.sas7bdat\")\nMentalConditionNow_Confirmed <- paste(survey2016$MentalConditionNow_Confirmed, collapse = \" \" )\ndocs<- Corpus(VectorSource(MentalConditionNow_Confirmed))\n\ndocs <- tm_map(docs, toSpace, \"/\")\ndocs <- tm_map(docs, toSpace, \"@\")\ndocs <- tm_map(docs, toSpace, \"\\\\|\")\n# Convert the text to lower case\ndocs <- tm_map(docs, content_transformer(tolower))\n# Remove numbers\ndocs <- tm_map(docs, removeNumbers)\n# Remove english common stopwords\ndocs <- tm_map(docs, removeWords, stopwords(\"english\"))\n# Remove your own stop word\n# specify your stopwords as a character vector\ndocs <- tm_map(docs, removeWords, c(\"issue\", \"issues\", \"mental\", \"health\")) \n# Remove punctuations\ndocs <- tm_map(docs, removePunctuation)\n# Eliminate extra white spaces\ndocs <- tm_map(docs, stripWhitespace)\n# Text stemming\n#docs <- tm_map(docs, stemDocument)\ndtm <- TermDocumentMatrix(docs)\nm <- as.matrix(dtm)\nv <- sort(rowSums(m),decreasing=TRUE)\nDocRows <- data.frame(word = names(v),freq=v)  \n\n\nDocRows <- subset(DocRows, word!=c(\"disorder\", \"etc\"))\nDocRows <- subset(DocRows, freq>1)\n\nwrite.table(DocRows, \"MentalDisorder.csv\", sep=\",\", row.names = FALSE)\n                    ",
+    "created" : 1517470105713.000,
+    "dirty" : true,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "1916459784",
+    "id" : "7CBFA9F",
+    "lastKnownWriteTime" : 7587756631797355567,
+    "last_content_update" : 1517471850627,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

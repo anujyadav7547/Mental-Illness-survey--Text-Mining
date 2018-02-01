@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "\ninstall.packages(\"tm\")\ninstall.packages(\"sas7bdat\")\ninstall.packages(\"wordcloud\") # word-cloud generator \ninstall.packages(\"xlsx\")\n\nsetwd(\"E:/Tutorial/Mental Health in Tech Survey/Text Mining in R/Mental Illness survey -Text Mining\")\nlibrary(xlsx)\n#library(tidyr)\nlibrary(tm)\nlibrary(sas7bdat)\n#library(quanteda)\nlibrary(wordcloud)\nsurvey2016 <- read.sas7bdat(\"survey2016.sas7bdat\")\n## Drop relevant columns\ncol <- c(40,48,64)\nsurvey2016 <- survey2016[,col]\nsurvey2016$Row <- 1:nrow(survey2016)\nsurvey2016<-subset(survey2016,GEN != \"\")\n#survey2016<-subset(survey2016, MentalDisorderNow == \"Yes\")\nsurvey2016<-subset(survey2016, ReasonRevealMentalInInterview != \"\")\n\n\n\n## now merging all the records to form a single row datasource\nReasons <- sapply(unique(survey2016$GEN),\n                  function(x){\n                    \n                    paste(survey2016[survey2016$GEN==x,\"ReasonRevealMentalInInterview\"]\n                          , collapse = \" \" )\n                    \n                    \n                  })\n\nReasonTxt<- trimws(ReasonTxt, \"both\")\n\n\n\nGEN <- as.list(as.character(unique(survey2016$GEN)))\n\nReasonTxt <- as.list(ReasonTxt)\nCollapsed<- cbind(GEN,ReasonTxt)\n\nmaleReason <- as.character(subset(Collapsed,GEN == \"Male\")[,2])\nfemaleReason <- as.character(subset(Collapsed,GEN == \"Female\")[,2])\nOtherReason <- as.character(subset(Collapsed,GEN == \"Other\")[,2])\n\nmaleDocs <- Corpus(VectorSource(maleReason))\nfemaleDocs <- Corpus(VectorSource(femaleReason))\notherDocs <- Corpus(VectorSource(OtherReason))\ninspect(maleDocs)\ninspect(femaleDocs)\ninspect(otherDocs)\ntoSpace <- content_transformer(function (x , pattern ) gsub(pattern, \" \", x))\nDocToDTM <- function(docs, GEN){\n  \n  docs <- tm_map(docs, toSpace, \"/\")\n  docs <- tm_map(docs, toSpace, \"@\")\n  docs <- tm_map(docs, toSpace, \"\\\\|\")\n  # Convert the text to lower case\n  docs <- tm_map(docs, content_transformer(tolower))\n  # Remove numbers\n  docs <- tm_map(docs, removeNumbers)\n  # Remove english common stopwords\n  docs <- tm_map(docs, removeWords, stopwords(\"english\"))\n  # Remove your own stop word\n  # specify your stopwords as a character vector\n  docs <- tm_map(docs, removeWords, c(\"issue\", \"issues\", \"mental\", \"health\")) \n  # Remove punctuations\n  docs <- tm_map(docs, removePunctuation)\n  # Eliminate extra white spaces\n  docs <- tm_map(docs, stripWhitespace)\n  # Text stemming\n  docs <- tm_map(docs, stemDocument)\n  dtm <- TermDocumentMatrix(docs)\n  m <- as.matrix(dtm)\n  v <- sort(rowSums(m),decreasing=TRUE)\n  DocRows <- data.frame(word = names(v),freq=v)\n  DocRows <-cbind(DocRows , GEN)\n  colnames(DocRows) <- c(\"Word\", \"Count\", \"Gender\")\n  DocRows\n}\n\nMaleRows <- DocToDTM(maleDocs, \"Male\")\nfemaleRows <- DocToDTM(femaleDocs, \"female\")\notherRows <- DocToDTM(otherDocs, \"Other\")\n\n\nWordCloudDTM <- rbind(MaleRows, femaleRows, otherRows)\n\nwrite.table(WordCloudDTM, \"WordCloudDTM.csv\", sep=\",\", row.names = FALSE)\n\nwrite.table(survey2016, \"CollapsedSurvery.csv\", sep=\",\", row.names = FALSE)\n\n\n\n\n",
+    "created" : 1517432959307.000,
+    "dirty" : true,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3299425172",
+    "id" : "1F0EF9AC",
+    "lastKnownWriteTime" : 1517434963,
+    "last_content_update" : 1517456525872,
+    "path" : "E:/Tutorial/Mental Health in Tech Survey/Text Mining in R/Mental Illness survey -Text Mining/Wordcloud by Stemming with Function.R",
+    "project_path" : "Wordcloud by Stemming with Function.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
